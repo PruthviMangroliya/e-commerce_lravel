@@ -61,7 +61,7 @@ class CouponController extends Controller
                 ]
             );
 
-            return $request;
+            // return $request;
             CouponModel::create([
                 'coupon_name' => $request->coupon_name,
                 'coupon_code' => $request->coupon_code,
