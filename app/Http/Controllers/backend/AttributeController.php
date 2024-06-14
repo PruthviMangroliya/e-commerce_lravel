@@ -32,7 +32,7 @@ class AttributeController extends Controller
         } else {
             $request->validate(
                 [
-                    'attribute_name' => 'unique:attributes,attribute_name'
+                    'attribute_name' => 'unique:attributes,attribute_name|alpha|max:25'
                 ]
             );
             //query builder-------------------

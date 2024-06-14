@@ -80,13 +80,13 @@ class CartController extends Controller
         // $request->session()->forget('cart');
     }
 
-    public function update_cart_quantity()
+    public function update_cart_quantity(Request $request)
     {
         $cart_data = session()->get('cart');
 
-        $product_id = $_POST['product_id'];
-        $quantity = $_POST['quantity'];
-        $product_price = $_POST['product_price'];
+        $product_id =$request->product_id;
+        $quantity =$request->quantity;
+        $product_price =$request->product_price;
 
         $cart_data[$product_id] = $quantity;
 

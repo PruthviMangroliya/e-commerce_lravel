@@ -34,6 +34,9 @@
                                     <label for="inputNanme4" class="form-label">Option Name</label>
                                     <input type="text" name="option_name" value="{{ $option->option_name }}"
                                         class="form-control">
+                                        @error('option_name')
+                                        <span style="color:red">{{ $message }}</span>
+                                    @enderror
                                     <br>
                                 </div>
 

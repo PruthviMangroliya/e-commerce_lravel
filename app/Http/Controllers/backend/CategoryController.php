@@ -43,7 +43,7 @@ class CategoryController extends Controller
         } else {
             $request->validate(
                 [
-                    'category_name' => 'unique:category,category_name',
+                    'category_name' => 'unique:category,category_name|alpha|max:25',
                     'category_image' => 'required',
                 ]
             );

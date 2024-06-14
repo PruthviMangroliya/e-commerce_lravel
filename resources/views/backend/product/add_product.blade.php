@@ -187,9 +187,25 @@
                                         </select>
                                     </div>
                                 </div>
-                         
-                                <div class="option_values">
-                                </div>
+
+                                {{-- to dispay option status --}}
+                                <div class="options_status"></div>
+
+                                <table class="table" hidden>
+                                    <thead>
+                                        <th></th>
+                                        <th class="col-2"> Option Value </th>
+                                        <th class="col-2"> Option Value Price</th>
+                                        <th> Option Value Status</th>
+                                        <th></th>
+                                    </thead>
+                                </table>
+
+                                {{-- to display option value --}}
+                                <div class="option_values"></div>
+
+
+
                                 {{-- <div class="col-12">
 
                                     <div class="form-control" >
@@ -299,13 +315,14 @@
             tags: true,
             placeholder: '-----Select Options---------'
         })
+    </script>
 
+    <script>
         $(document).ready(function() {
             let text = "";
             // --------------- to get option value on multi select --------------------------
             $("#options").on('change', function() {
-                // alert($("#attribute").val());                
-                $(".table").removeAttr('hidden')
+
                 $.ajax({
                     url: "get_option_values",
                     method: "POST",
@@ -314,40 +331,195 @@
                         option_id: $("#options").val()
                     },
                     success: function(data) {
-                        $(".option_values").html(data);
+                        // $(".option_values").html(data);
+                        console.log(data);
+
+                        $(".table").removeAttr('hidden')
+                        $('.options_status').empty();
+                        $('.option_values').empty();
+
+                        data['options'].forEach(element => {
+                            option_id = element['option_id']
+                            option_name = element['option_name']
+
+
+                            options_status = '<div class="form-control">' +
+                                '<h4>' + option_name + ' Status : </h4>' +
+                                '<b>Enable</b> ' +
+                                '<input type="radio" name="option_status_' + option_id +
+                                '"' +
+                                'value="enable" checked>' +
+                                '&emsp;' +
+                                '<b> Disable </b>' +
+                                '<input type="radio"  name="option_status_' +
+                                option_id +
+                                '" value="disable">' +
+                                '&emsp;' +
+                                '</div>' +
+                                '<br>'
+
+
+                            // console.log(options_status)
+                            $('.options_status').append(options_status)
+                        });
+
+
+                        data['option_values'].forEach(function(element, index) {
+
+                            option_value_id = element['option_value_id']
+                            option_value = element['option_value']
+                            option_name = element['option_name']
+
+                            var option_values =
+                                '<div class="col-12 form-control" >' +
+
+                                '<input class="col-2" type="text" name="add_option_ids[]" disabled value="' +
+                                option_name + ' "> &emsp;' +
+
+                                '<input type="hidden" name="add_option_value_id[]" value="' +
+                                option_value_id + ' "> &emsp;' +
+
+                                '<input class="col-2" type="text" name="add_option_value_name[]" disabled value="' +
+                                option_value + ' "> &emsp;' +
+
+                                '<input class="col-2" type="text" name="add_option_value_price[]" value=""> &emsp;' +
+
+                                '<input type="hidden" value="' + index + '" name="status_num[]">' +
+
+                                'Enable ' +
+                                '<input type="radio" name="add_option_value_status_' +
+                                index + '" value="enable" checked> &emsp;' +
+
+                                'Disable ' +
+                                '<input type="radio" name="add_option_value_status_' +
+                                index + '" value="disable"> &emsp;' +
+
+                                '<button type="button" class="btn btn-danger " id="remove"> X </button>' +
+
+                                '</div>' +
+                                '<br> '
+
+                            console.log(option_values)
+
+                            $('.option_values').append(option_values)
+                        });
+
                     }
                 });
-            })
+            });
 
-            function myfunction(item, index) {
-                text += index + ": " + item['option_name'] + "<br>";
-            }
+        function myfunction(item, index) {
+            text += index + ": " + item['option_name'] + "<br>";
+        }
 
-            $(".option_values").on("click", "#remove", function() {
-                this.closest('div').remove();
-            })
+        $(".option_values").on("click", "#remove", function() {
+        this.closest('div').remove();
+        })
 
-            // --------------- to get option value on checkbox --------------------------
+        // --------------- to get option value on checkbox --------------------------
 
-            // $(".optioin_id").on('click', function() {
+        // $(".optioin_id").on('click', function() {
 
-            //     if (this.checked) {
+        //     if (this.checked) {
 
-            //         // console.log('checked')
-            //         $(this).parent('div').children("div").removeAttr('hidden');
-            //         $(this).parent('div').children(".table").removeAttr('hidden')
+        //         // console.log('checked')
+        //         $(this).parent('div').children("div").removeAttr('hidden');
+        //         $(this).parent('div').children(".table").removeAttr('hidden')
 
-            //     } else {
-            //         // console.log('unchecked')
-            //         $(this).parent('div').children("div").attr('hidden', true);
-            //         $(this).parent('div').children(".table").attr('hidden', true);
-            //     }
+        //     } else {
+        //         // console.log('unchecked')
+        //         $(this).parent('div').children("div").attr('hidden', true);
+        //         $(this).parent('div').children(".table").attr('hidden', true);
+        //     }
 
-            // })
+        // })
 
-            // $(".option_values").on("click", "#remove", function() {
-            //     this.closest('div').remove();
-            // })
+        // $(".option_values").on("click", "#remove", function() {
+        //     this.closest('div').remove();
+        // })
         })
     </script>
+
+     
+    {{-- <script>
+        $(document).ready(function() {
+            $("#options").on('change', function() {
+                $.ajax({
+                    url: "get_option_values",
+                    method: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        option_id: $("#options").val()
+                    },
+                    success: function(data) {
+                        $('.option_values_table').removeAttr('hidden');
+                        $('.options_status').empty();
+                        $('.option_values').empty();
+
+                        const options = data['options'];
+                        const optionValues = data['option_values'];
+
+                        // Append options status
+                        options.forEach(function(element) {
+                            const option_id = element['option_id'];
+                            const option_name = element['option_name'];
+
+                            const options_status = `
+                                <div class="form-control">
+                                    <h4>${option_name} Status:</h4>
+                                    <b>Enable</b> 
+                                    <input type="radio" name="option_status_${option_id}" value="enable" checked> 
+                                    &emsp;
+                                    <b>Disable</b> 
+                                    <input type="radio" name="option_status_${option_id}" value="disable">
+                                    &emsp;
+                                </div>
+                                <br>
+                            `;
+                            $('.options_status').append(options_status);
+                        });
+
+                        // Append option values
+                        optionValues.forEach(function(element, index) {
+                            const option_value_id = element['option_value_id'];
+                            const option_value = element['option_value'];
+                            const option_name = element['option_name'];
+
+                            const option_values = `
+                                <tr class="option_values">
+                                    <td>
+                                        <input type="hidden" name="add_option_ids[]" value="${option_value_id}">
+                                        <input class="form-control" type="text" name="add_option_value_name[]" disabled value="${option_name}">
+                                    </td>
+                                    <td>
+                                        <input class="form-control" type="text" name="add_option_value_name[]" disabled value="${option_value}">
+                                    </td>
+                                    <td>
+                                        <input class="form-control" type="text" name="add_option_value_price[]" value="">
+                                    </td>
+                                    <td>
+                                        <input type="hidden" value="${index}" name="status_num[]">
+                                        <label>
+                                            <input type="radio" name="add_option_value_status_${index}" value="enable" checked> Enable
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="add_option_value_status_${index}" value="disable"> Disable
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger remove-option-value">X</button>
+                                    </td>
+                                </tr>
+                            `;
+                            $('.option_values').append(option_values);
+                        });
+                    }
+                });
+            });
+
+            $(document).on('click', '.remove-option-value', function() {
+                $(this).closest('tr').remove();
+            });
+        });
+    </script> --}}
 @endsection

@@ -53,10 +53,10 @@ class CouponController extends Controller
 
             $request->validate(
                 [
-                    'coupon_name' => 'required',
-                    'coupon_code' => 'required|unique:coupons,coupon_code',
+                    'coupon_name' => 'required|max:100',
+                    'coupon_code' => 'required|unique:coupons,coupon_code|max:50',
                     'discount_type' => 'required',
-                    'discount_amount' => 'required',
+                    'discount_amount' => 'required|numeric',
                     'expires_at' => 'required|after:13/06/2024'
                 ]
             );
@@ -77,21 +77,19 @@ class CouponController extends Controller
             // if (!empty($apply_on_array)) {
             //     foreach ($apply_on_array as $apply_on) {
 
-                    
+
             //         if (!in_array($apply_on, $data['coupon_apply_on'])) {
             //             $coupon->CouponApplyOn()->create([
             //                 'apply_on' => $apply_on
             //             ]);
 
-                        
+
             //         }
             //     }
             // }
-         
+
 
             return redirect()->to('coupons');
         }
     }
-
-  
 }

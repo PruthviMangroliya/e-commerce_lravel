@@ -43,9 +43,9 @@ class ProductController extends Controller
 
             $request->validate(
                 [
-                    'product_title' => 'required',
-                    'product_description' => 'required',
-                    'product_price' => 'required|numeric',
+                    'product_title' => 'required|alpha|max:50',
+                    'product_description' => 'required|alpha_num|max:200',
+                    'product_price' => 'required|numeric|max:50',
                     'product_quantity' => 'required | numeric',
                     'category_id' => 'required',
                     'subcategory_id' => 'required'
@@ -55,8 +55,7 @@ class ProductController extends Controller
             $product_images = $request->product_images;
             $attributes_array = $request->attribute_ids;
             $options_array = $request->options;
-            $option_value_id_array = $request->option_value_id;
-            $option_value_price_array = $request->option_value_price;
+
 
             // ================= store product in product Table================= 
             $product = productModel::create([
@@ -67,9 +66,8 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
                 'subcategory_id' => $request->subcategory_id
             ]);
-           
+
             $product_id = $product->product_id;
-            // $product_id = 3;
 
             // ================= image upload and store in DB================= 
             foreach ($product_images as $image) {
@@ -121,7 +119,7 @@ class ProductController extends Controller
                 // $product_option_id = $product_option->product_option_id;
             }
 
-          
+
 
             // //================= store Options in product_option_value  table================= //old
             // if (!empty($options_array)) {
@@ -157,7 +155,7 @@ class ProductController extends Controller
                         'option_value_id' => $add_option_value_array[$key],
                         'product_id' => $product_id,
                         'option_value_status' => $_POST['add_option_value_status_' . $i[$key]],
-                        'option_value_price' => $add_option_value_price_array[$key]
+                        'option_value_price' => $value_price
                     ]);
                 }
             }
@@ -165,8 +163,6 @@ class ProductController extends Controller
 
             // return $data;
             return redirect()->to('product_list');
-            // echo "</pre>";
-
         }
     }
 
@@ -185,16 +181,19 @@ class ProductController extends Controller
             $data['product_option_values'] = ProductOptionValueModel::join('option_value', 'product_option_value.option_value_id', 'option_value.option_value_id')->where("product_id", $product_id)->get();
             $data['option_values'] = OptionValueModel::join('options', 'option_value.option_id', 'options.option_id')->get();
 
-            // return $data;
-            // foreach ($data as $s) {
-            //    echo $category_id = $s->category_id;
-            //    echo $product_title = $s->product_title;
-            // }
-
             return view('backend/product/edit_product', $data);
         } else {
 
-            // return $request->all();
+            $request->validate(
+                [
+                    'product_title' => 'required|alpha|max:50',
+                    'product_description' => 'required|alpha_num|max:200',
+                    'product_price' => 'required|numeric',
+                    'product_quantity' => 'required | numeric',
+                    'category_id' => 'required',
+                    'subcategory_id' => 'required'
+                ]
+            );
 
             $product_images = $request->product_images;
             $attributes_array = $request->attribute_ids;
@@ -204,7 +203,6 @@ class ProductController extends Controller
 
             $product_attribute = ProductAttributeModel::where("product_id", $product_id)->get('attribute_id');
             $product_options = ProductOptionModel::where("product_id", $product_id)->get('option_id');
-            $product_option_values = ProductOptionValueModel::where("product_id", $product_id)->get('option_value_id');
 
             //===================== update product ===================== 
             productModel::find($product_id)->update([
@@ -228,11 +226,6 @@ class ProductController extends Controller
                 foreach ($attributes_array as $attribute) {
                     if (!in_array($attribute, $attribute_id)) {
 
-                        // $data['product_attribute'][] = array(
-                        //     'product_id' => $product_id,
-                        //     'attribute_id' => $attribute,
-                        //     "insert"
-                        // );
                         ProductAttributeModel::create([
                             'product_id' => $product_id,
                             'attribute_id' => $attribute
@@ -244,7 +237,8 @@ class ProductController extends Controller
                 if (!empty($attribute_id)) {
                     foreach ($attribute_id as $attribute) {
                         if (!in_array($attribute, $attributes_array)) {
-                            DB::table('product_attributes')->where(['attribute_id' => $attribute, 'product_id' => $product_id])->delete();
+                            ProductAttributeModel::where(['attribute_id' => $attribute, 'product_id' => $product_id])->delete();
+                            // DB::table('product_attributes')->where(['attribute_id' => $attribute, 'product_id' => $product_id])->delete();
                         }
                     }
                 }
@@ -256,7 +250,8 @@ class ProductController extends Controller
                 if (!empty($attribute_id)) {
                     foreach ($attribute_id as $attribute) {
                         if (!in_array($attribute, $attributes_array)) {
-                            DB::table('product_attributes')->where(['attribute_id' => $attribute, 'product_id' => $product_id])->delete();
+                            ProductAttributeModel::where(['attribute_id' => $attribute, 'product_id' => $product_id])->delete();
+                            // DB::table('product_attributes')->where(['attribute_id' => $attribute, 'product_id' => $product_id])->delete();
                         }
                     }
                 }
@@ -287,31 +282,20 @@ class ProductController extends Controller
 
                     if (!in_array($option_id, $option_ids)) {
 
-                        $product_option = ProductOptionModel::create([
+                        ProductOptionModel::create([
                             'option_id' => $option_id,
                             'product_id' => $product_id,
                             'option_status' => $_POST['option_status_' . $option_id]
                         ]);
-
-                        // $data['product_option'][] = array(
-                        //     'option_id' => $option_id,
-                        //     'product_id' => $product_id,
-                        //     'option_status' => $_POST['option_status_' . $option_id]
-                        // );
-
                     } else {
                         ProductOptionModel::where('option_id', $option->option_id)->update([
                             'option_status' => $_POST['option_status_' . $option_id]
                         ]);
-                        $data['product_option'][] = array(
-                            'update',
-                            'option_status' => $_POST['option_status_' . $option_id]
-                        );
                     }
                 }
             }
 
-          
+
             // ================= store Options values in product_option_value  table================= //old
             // if (!empty($options_array)) {
             //     $option_value_ids = array();
@@ -368,7 +352,7 @@ class ProductController extends Controller
                         'product_id' => $product_id,
                         'option_value_status' => $_POST['add_option_value_status_' . $i[$key]],
                         'option_value_price' => $add_option_value_price_array[$key]
-                    ]);                    
+                    ]);
                 }
             }
 
@@ -383,12 +367,6 @@ class ProductController extends Controller
                         'option_value_status' => $_POST['option_value_status_' . $key],
                         'option_value_price' => $option_value_price_array[$key]
                     ]);
-
-                    $data['product_option_value'][] = array(
-                        'update',
-                        'option_value_status' => $_POST['option_value_status_' . $key],
-                        'option_value_price' => $option_value_price_array[$key]
-                    );
                 }
             }
 
@@ -397,70 +375,73 @@ class ProductController extends Controller
         }
     }
 
-    public function get_option_values()
+    public function get_option_values(Request $request)
     {
-        $option_id = $_POST['option_id'];
-        // print_r($option_id);
-        // die;
+        $option_id = $request->option_id;
 
-        $options = OptionModel::whereIn('option_id', $option_id)->get();
-        $option_values = DB::table('option_value')->join('options', 'option_value.option_id', '=', 'options.option_id')->whereIn('option_value.option_id', $option_id)->get();
+        // $options = OptionModel::whereIn('option_id', $option_id)->get();
+        // $option_values = DB::table('option_value')->join('options', 'option_value.option_id', '=', 'options.option_id')->whereIn('option_value.option_id', $option_id)->get();
 
-        foreach ($options as $option) {
-            // echo $option->option_name;
-            echo '
-        <div class="form-control">
-            <h4>' . $option->option_name . ' Status : </h4>
-            <b>Enable</b> <input type="radio" name="option_status_' . $option->option_id . '"
-                value="enable" checked>
-            &emsp;
-            <b> Disable </b><input type="radio"
-                name="option_status_' . $option->option_id . '" value="disable">
-            &emsp;
-        </div>
-        <br>';
-        }
-        echo '<table class="table">
-            <thead>
-                <th class="col-3"> Option </th>
-                <th class="col-2"> Option Value </th>
-                <th class="col-2"> Option Value Price</th>
-                <th> Option Value Status</th>
-                <th></th>
-            </thead>
-        </table> ';
+        $data['options'] = OptionModel::whereIn('option_id', $option_id)->get();
+        $data['option_values'] = DB::table('option_value')->join('options', 'option_value.option_id', '=', 'options.option_id')->whereIn('option_value.option_id', $option_id)->get();
 
-        foreach ($option_values as $key => $value) {
-            echo  '                    
-                    <div class="col-12 option_values form-control" >
+        return $data;
+        
+        // foreach ($options as $option) {
+        //     // echo $option->option_name;
+        //     echo '
+        //     <div class="form-control">
+        //         <h4>' . $option->option_name . ' Status : </h4>
+        //         <b>Enable</b> <input type="radio" name="option_status_' . $option->option_id . '"
+        //             value="enable" checked>
+        //         &emsp;
+        //         <b> Disable </b><input type="radio"
+        //             name="option_status_' . $option->option_id . '" value="disable">
+        //         &emsp;
+        //     </div>
+        //     <br>';
+        // }
+        // echo '<table class="table">
+        //     <thead>
+        //         <th class="col-3"> Option </th>
+        //         <th class="col-2"> Option Value </th>
+        //         <th class="col-2"> Option Value Price</th>
+        //         <th> Option Value Status</th>
+        //         <th></th>
+        //     </thead>
+        // </table> ';
 
-                        <input class="col-2" type="text" name="add_option_ids[]" disabled
-                        value="' . $value->option_name . ' "> &emsp;
+        // foreach ($option_values as $key => $value) {
+        //     echo  '                    
+        //             <div class="col-12 option_values form-control" >
+
+        //                 <input class="col-2" type="text" name="add_option_ids[]" disabled
+        //                 value="' . $value->option_name . ' "> &emsp;
             
-                        <input type="hidden" name="add_option_value_id[]"
-                            value="' . $value->option_value_id . ' "> &emsp;
+        //                 <input type="hidden" name="add_option_value_id[]"
+        //                     value="' . $value->option_value_id . ' "> &emsp;
 
-                        <input class="col-2" type="text" name="add_option_value_name[]" disabled
-                            value="' . $value->option_value . ' "> &emsp;
+        //                 <input class="col-2" type="text" name="add_option_value_name[]" disabled
+        //                     value="' . $value->option_value . ' "> &emsp;
 
-                        <input class="col-2" type="text" name="add_option_value_price[]"
-                            value=""> &emsp;
+        //                 <input class="col-2" type="text" name="add_option_value_price[]"
+        //                     value=""> &emsp;
 
-                        <input type="hidden" value="' . $key . '" name=status_num[]>
+        //                 <input type="hidden" value="' . $key . '" name=status_num[]>
 
-                        Enable <input type="radio"
-                            name="add_option_value_status_' . $key . '"
-                            value="enable" checked> &emsp;
-                        Disable <input type="radio"
-                            name="add_option_value_status_' . $key . '"
-                            value="disable"> &emsp;
+        //                 Enable <input type="radio"
+        //                     name="add_option_value_status_' . $key . '"
+        //                     value="enable" checked> &emsp;
+        //                 Disable <input type="radio"
+        //                     name="add_option_value_status_' . $key . '"
+        //                     value="disable"> &emsp;
 
-                        <button type="button" class="btn btn-danger " id="remove"> X
-                        </button>
+        //                 <button type="button" class="btn btn-danger " id="remove"> X
+        //                 </button>
 
-                    </div>
-                    <br> ';
-        }
+        //             </div>
+        //             <br> ';
+        // }
     }
 
     public function delete_product($product_id)
@@ -471,9 +452,9 @@ class ProductController extends Controller
         return redirect()->to('product_list');
     }
 
-    public function delete_image()
+    public function delete_image(Request $request)
     {
-        $product_image_id = $_POST['img_id'];
+        $product_image_id = $request->img_id;
         $image = ProductImagesModel::find($product_image_id);
         // echo $image->product_image_name;
         unlink($image->product_image_name);

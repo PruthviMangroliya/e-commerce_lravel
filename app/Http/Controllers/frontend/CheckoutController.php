@@ -274,7 +274,6 @@ class CheckoutController extends Controller
 
     public function validate_coupon(Request $request)
     {
-        // $coupon_code = $_POST['coupon_code'];
         // $data = CouponModel::where("coupon_code", "$coupon_code")->get();
         $data = CouponModel::where(['coupon_code' => $request->coupon_code, 'coupon_status' => 1])->get();
         // CouponModel::find("coupon_code", "$coupon_code");

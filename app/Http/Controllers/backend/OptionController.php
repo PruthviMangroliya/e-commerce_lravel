@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\AttributeModel;
 use App\Models\OptionModel;
 use App\Models\OptionValueModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
+
 
 class OptionController extends Controller
 {
@@ -31,18 +29,19 @@ class OptionController extends Controller
             return view('backend/option/add_option');
         } else {
 
+            $request->validate(
+                [
+                    'option_name' => 'unique:options,option_name|alpha|max:25',
+                ]
+            );
+
             $option_values_array = $request->option_values;
-            $values_number_array = $request->values_number;
 
             $option = OptionModel::create([
                 'option_name' => $request->option_name,
             ]);
 
             if (!empty($option_values_array)) {
-
-                // foreach ($values_number_array as $key => $i) {
-                //     $option_value_status[] = $_POST['option_status_' . $i];
-                // }
 
                 foreach ($option_values_array as $key => $option_value) {
                     if ($option_value != '') {
@@ -53,10 +52,7 @@ class OptionController extends Controller
                     }
                 }
             }
-            // print_r($data);
-
-            // return $request->all();
-
+           
             return redirect()->to('option_list');
         }
     }
@@ -70,6 +66,12 @@ class OptionController extends Controller
             // return $data;
             return view('backend/option/edit_option', $data);
         } else {
+
+            $request->validate(
+                [
+                    'option_name' => 'alpha|max:25',
+                ]
+            );
 
             $option=OptionModel::find($option_id)->update([
                 'option_name' => $request->option_name,
