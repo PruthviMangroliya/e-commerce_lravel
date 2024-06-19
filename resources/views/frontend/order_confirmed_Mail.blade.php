@@ -46,12 +46,26 @@
 
 <body>
     <div class="container">
-        
+
         <div class="message">
-            <p>Dear {{ $mailData['name'] }},</p>
+            {{-- <p>Dear {{ $mailData['name'] }},</p> --}}
             <p>Thank you for providing your details Your Company Name.
         </div>
+
+        <center>
+            <h2 style="padding: 23px;background: #b3deb8a1;border-bottom: 6px green solid;">
+                <a href="{{ url('dashboard')}}">ecom</a>
+            </h2>
+        </center>
         
+        <p>Hi, Sir</p>
+        <p>Ypur order has been placed successfully</p>
+        <p>we receive the payment and order is confirmed</p>
+        <p>you can see your order by clicking this link</p>
+        <a href="{{ route('my_orders')}}">View Order</a>
+
+        <strong>Thank you</strong>
+
     </div>
 </body>
 

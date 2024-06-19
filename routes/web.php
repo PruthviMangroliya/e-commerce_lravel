@@ -127,7 +127,13 @@ Route::post('cancle_order/{id}', [CustomerController::class, 'cancle_order'])->n
 
 //Mail
 Route::get('ordre_confiremd_mail',[OrderShipped::class,'content']);
+// Route::get('email-test', function(){
+//     $details['email'] = 'your_email@gmail.com';
+//     dispatch(new App\Jobs\SendEmailJob($details));
+//     dd('done');
+//     });
 
+    Route::get('email-test',[CheckoutController::class,'sendEmail']);
 
 
 require __DIR__ . '/auth.php';

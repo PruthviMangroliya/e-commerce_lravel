@@ -5,7 +5,11 @@ namespace App\Http\Controllers\frontend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\CategoryModel;
+use App\Models\ProductImagesModel;
+use App\Models\ProductModel;
+use App\Models\SubCategoryModel;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryFrontController extends Controller
 {
@@ -34,16 +38,28 @@ class CategoryFrontController extends Controller
     public function get_category_info($category_id)
     {
 
-        $data['categories'] = DB::table('category')->where('category_id', $category_id)->get();
-        $data['subcategories'] = DB::table('subcategory')->where('category_id', $category_id)->get();;
-        $data['products'] = DB::table('products')->where('category_id', $category_id)->get();
-        $data['product_images'] = DB::table('product_images')->get();
+        $data['categories'] = Cache::remember('CATEGORY_SINGLE_'.$category_id, 360, function () use($category_id){
+            return CategoryModel::find($category_id);
+        });
+        $data['subcategories'] = Cache::remember('subcategory_'.$category_id, 360, function () use($category_id){
+            return SubCategoryModel::where('category_id', $category_id)->get();
+        });
+        $data['products'] = Cache::remember('products_'.$category_id, 360, function () use($category_id){
+            return ProductModel::where('category_id', $category_id)->get();
+        });
+        $data['product_images'] = Cache::remember('product_images', 360, function () {
+            return ProductImagesModel::all();
+        });
+
+        // $data['categories'] =CategoryModel::where('category_id', $category_id)->get();
+        // $data['subcategories'] = SubCategoryModel::where('category_id', $category_id)->get();
+        // $data['products'] = ProductModel::where('category_id', $category_id)->get();
+        // $data['product_images'] = ProductImagesModel::all();
+        
         $data['cart_data'] = session()->get('cart');
 
-        // return $data;
 
-        // echo view('frontend/header', $data);
         return view('frontend/category_description', $data);
-        // echo view('frontend/footer');
+   
     }
 }

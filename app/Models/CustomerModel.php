@@ -12,4 +12,5 @@ class CustomerModel extends Model
     use SoftDeletes;
     
     protected $table='customers';
+    protected $primaryKey='customer_id';
 }

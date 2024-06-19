@@ -47,36 +47,36 @@
                             <div class="col-12">
                                 <label for="inputNanme4" class="form-label">subcategory Name</label>
                                 <input type="text" name="subcategory_name" value="<?php echo $subcategory->subcategory_name ?>" class="form-control">
+                                @error('subcategory_name')
+                                <span style="color:red">{{ $message }}</span>
+                                @enderror
                             </div>
                             
-                            <div class="col-12">
+                            {{-- <div class="col-12">
                                 <label for="subcategory_image" class="form-label">subcategory Images</label>
                                 <input type="file" name="subcategory_image" class="form-control" id="subcategory_image">
                                 @error('subcategory_image')
                                 <span style="color:red">{{ $message }}</span>
                                 @enderror
                                 <img src="{{ asset($subcategory->subcategory_image) }}" alt="" height="200px" width="200px">
-                            </div>
+                            </div> --}}
 
 
 
                             <div class="text-center">
                                 <button type="submit" name="submit" class="btn btn-primary">Update</button>
-                                <button name="discard" class="btn btn-secondary">Discard</button>
+                                <button type="button" id="discard" class="btn btn-secondary">Discard</button>
                             </div>
 
                         </form>
 
-                        <!-- ---------discard button------- -->
-                        <?php
-                        if (isset($_POST["discard"])) {
-                        ?>
                             <script>
-                                window.location.href = 'subcategory_list.php';
+                                $("#discard").on('click',function(){
+
+                                    window.location.href = "{{ url('/subcategory_list')}}";
+                                })
                             </script>
-                        <?php
-                        }
-                        ?>
+                      
                     </div>
                 </div>
     </section>

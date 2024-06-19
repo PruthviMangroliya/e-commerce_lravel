@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubcategoryModel;
 use App\Models\categoryModel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 
@@ -62,22 +63,25 @@ class SubCategoryController extends Controller
 
             $image = $request->subcategory_image;
 
-            if ($image != '') {
-                //============= image =================
-                $path = 'uploads/subcategory';
-                $image_name = $path . "/" . $request->subcategory_name . rand() . '.' . $image->getClientOriginalExtension();
-                $image->move($path, $image_name);
+            // if ($image != '') {
+            //     //============= image =================
+            //     $path = 'uploads/subcategory';
+            //     $image_name = $path . "/" . $request->subcategory_name . rand() . '.' . $image->getClientOriginalExtension();
+            //     $image->move($path, $image_name);
 
-                SubcategoryModel::where(['subcategory_id' => $subcategory_id])->update([
-                    'subcategory_image' => $image_name,
-                ]);
-            }
+            //     SubcategoryModel::where(['subcategory_id' => $subcategory_id])->update([
+            //         'subcategory_image' => $image_name,
+            //     ]);
+            // }
 
             SubcategoryModel::where(['subcategory_id' => $subcategory_id])->update([
                 // SubcategoryModel::find($subcategory_id)->update([
                 'subcategory_name' => $request->subcategory_name,
                 'category_id' => $request->category_id
             ]);
+
+            //clear the cache for subcategory
+            Cache::clear('subcategory');
 
             return redirect()->to('subcategory_list');
         }

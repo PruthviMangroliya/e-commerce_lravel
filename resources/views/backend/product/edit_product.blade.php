@@ -31,20 +31,31 @@
                                 <div class="col-12">
                                     <label for="product_title" class="form-label">Product Title</label>
                                     <input type="text" name="product_title" value="{{ $product->product_title }}"
-                                        class="form-control" id="product_title" required>
+                                        class="form-control" id="product_title">
+
+                                    @error('product_title')
+                                        <span style="color:red">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="col-12">
                                     <label for="product_description" class="form-label">product description</label>
                                     <textarea name="product_description" value="" class="form-control" id="product_description" required>
-                                {{ $product->product_description }}
-                                </textarea>
+                                    {{ $product->product_description }}
+                                    </textarea>
+                                    @error('product_description')
+                                        <span style="color:red">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="col-12">
                                     <label for="product_price" class="form-label">product price</label>
                                     <input type="text" name="product_price" value="{{ $product->product_price }}"
-                                        class="form-control" id="product_price" required>
+                                        class="form-control" id="product_price">
+
+                                    @error('product_price')
+                                        <span style="color:red">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="col-12">
@@ -63,6 +74,9 @@
                                                 {{ $c->category_name }} </option>
                                         @endforeach
                                     </select>
+                                    @error('category_id')
+                                        <span style="color:red">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="col-12">
@@ -75,6 +89,9 @@
                                                 {{ $s->subcategory_name }} </option>
                                         @endforeach
                                     </select>
+                                    @error('subcategory_id')
+                                        <span style="color:red">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="col-12">
@@ -424,7 +441,7 @@
                 i++;
             })
 
-            
+
         })
     </script>
 

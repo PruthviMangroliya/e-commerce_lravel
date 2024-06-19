@@ -80,7 +80,7 @@
                         <div class="tab_container">
                             <div id="tab1" class="tab_content grid-products">
                                 <div class="productSlider">
-                                    @foreach ($products as $product)
+                                    @foreach ($leatest_products as $product)
                                     <div class="col-12 item">
 
                                         <div class="product-image">

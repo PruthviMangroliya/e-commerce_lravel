@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\CategoryModel;
+use App\Models\OptionModel;
 use App\Models\ProductImagesModel;
+use App\Models\SubCategoryModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -104,10 +108,20 @@ class CartController extends Controller
     {
         $data['cart_data'] = $request->session()->get('cart');
         $data['cart_product_option_data'] = $request->session()->get('cart_product_option');
-        $data['options'] = DB::table('options')->get();
 
-        $data['categories'] = DB::table('category')->get();
-        $data['subcategories'] = DB::table('subcategory')->get();
+
+        $data['categories'] = Cache::remember('category', 360, function () {
+            return CategoryModel::all();
+        });
+        $data['subcategories'] = Cache::remember('subcategory', 360, function () {
+            return SubCategoryModel::all();
+        });  
+        $data['subcategories'] = Cache::remember('subcategory', 360, function () {
+            return OptionModel::all();
+        });
+        // $data['options'] = DB::table('options')->get();
+        // $data['categories'] = DB::table('category')->get();
+        // $data['subcategories'] = DB::table('subcategory')->get();
 
         if (!empty($data['cart_data'])) {
             foreach ($data['cart_data'] as $product_id => $quantity) {

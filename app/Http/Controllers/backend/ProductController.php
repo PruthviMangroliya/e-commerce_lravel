@@ -15,6 +15,7 @@ use App\Models\ProductAttributeModel;
 use App\Models\ProductImagesModel;
 use App\Models\ProductOptionModel;
 use App\Models\ProductOptionValueModel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 
@@ -187,7 +188,7 @@ class ProductController extends Controller
             $request->validate(
                 [
                     'product_title' => 'required|alpha|max:50',
-                    'product_description' => 'required|alpha_num|max:200',
+                    'product_description' => 'required|max:200',
                     'product_price' => 'required|numeric',
                     'product_quantity' => 'required | numeric',
                     'category_id' => 'required',
@@ -371,6 +372,9 @@ class ProductController extends Controller
             }
 
             // return $data;
+            //clear the cache for product
+            Cache::clear('products');
+
             return redirect()->to('product_list')->with('message', 'Product Updated successfully');
         }
     }

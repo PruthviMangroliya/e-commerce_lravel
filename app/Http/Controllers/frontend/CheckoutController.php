@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailJob;
 use App\Models\CouponModel;
 use App\Models\CouponOrderModel;
+use App\Models\CustomerModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\OrdersModel;
@@ -66,7 +68,7 @@ class CheckoutController extends Controller
         $cart_data = session()->get('cart');
 
         $order_products = 0;
-        // $order_total = 0;
+        
 
         foreach ($cart_data as $product_id => $quantity) {
 
@@ -95,7 +97,7 @@ class CheckoutController extends Controller
             //============ insert into Coupon order ================
             if (isset($request->coupon_id)) {
                 CouponOrderModel::create([
-                    'order_id'=>$order_id,
+                    'order_id' => $order_id,
                     'coupon_id' => $request->coupon_id
                 ]);
                 // $data['coupon+order'] = [
@@ -113,6 +115,7 @@ class CheckoutController extends Controller
                 "discounted_amount" => $discounted_total
             ]);
 
+            //============ insert into order Products ================
             foreach ($cart_data as $product_id => $quantity) {
                 $product = DB::table('products')->where('product_id', $product_id)->get();
 
@@ -145,7 +148,8 @@ class CheckoutController extends Controller
                 OrdersModel::find($order_id)->update(['transaction_id' => $transaction_id, 'order_status' => 1]);
 
                 session()->forget('cart');
-                return view('dashboard');
+                $this->sendEmail(); //send the mail
+                return redirect(route('my_orders'));
             } else {
                 // return "error"; 
                 // Handle errors
@@ -195,8 +199,7 @@ class CheckoutController extends Controller
                     $cart_product_ids[] = $product_id;
                 }
 
-                $data['cart_products'] = DB::table('products')
-                    ->whereIn('products.product_id', $cart_product_ids)->get();
+                $data['cart_products'] = DB::table('products')->whereIn('products.product_id', $cart_product_ids)->get();
 
                 $data['cart_product_option_data'] = $request->session()->get('cart_product_option');
                 $data['options'] = DB::table('options')->get();
@@ -250,6 +253,23 @@ class CheckoutController extends Controller
         }
     }
 
+    //mail using job and queue
+    public function sendEmail()
+    {
+        $customer_id = session()->get('customer')['customer_id'];
+        $customer = CustomerModel::find($customer_id);
+
+        $details = array(
+            'email' => $customer['customer_email'],
+            'name' => $customer['customer_firstname'],
+        );
+
+        /* This method will call SendEmailJob Job */
+        if (dispatch(new SendEmailJob($details))) {
+
+            dd('done');
+        }
+    }
 
     public function get_coupon()
     {

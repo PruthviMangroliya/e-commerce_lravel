@@ -5,18 +5,20 @@ namespace App\Http\Controllers\frontend;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\customer_register_Request;
 use App\Mail\OrderShipped;
-use App\Models\order;
+use App\Models\CustomerModel;
 use App\Models\OrdersModel;
 use App\Models\OrderTotalModel;
+use App\Traits\ExampleTrait;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Stripe\Stripe;
+
 use Stripe\Refund;
 
 class CustomerController extends Controller
 {
+    use ExampleTrait;
     // public function header()
     // {
     //     $data['categories'] = DB::table('category')->get();
@@ -154,32 +156,32 @@ class CustomerController extends Controller
 
     public function customers_order($order_id = '')
     {
-
-        $customer_id = session()->get('customer')['customer_id'];
-
-        $data['order_total']=OrderTotalModel::all();
-        if (!empty($order_id)) {
-            $data['order_details'] = DB::table('orders')
-                ->join('order_products', 'orders.order_id', '=', 'order_products.order_id')
-                ->where('orders.order_id', $order_id)->get();
-
-                
-            //     Mail::to('xatay89072@morxin.com')->send(new OrderShipped([
-            //         'name' => 'Demo',
-            //    ]));
-
-            // return $data;
-            // return view('frontend/order_confirmed_Mail', $data);
-
-        } else {
-            $data['orders'] = DB::table('orders')
-                ->where('customer_id', $customer_id)->get();
-        }
-
         if (session()->get('customer')) {
+            $customer_id = session()->get('customer')['customer_id'];
 
+            $data['order_total'] = OrderTotalModel::all();
+            
+            if (!empty($order_id)) {
+                $data['order_details'] = DB::table('orders')
+                    ->join('order_products', 'orders.order_id', '=', 'order_products.order_id')
+                    ->where('orders.order_id', $order_id)->get();
+
+                // $customer=CustomerModel::find($customer_id);
+                // Mail::to($customer['customer_firstname'])->send(new OrderShipped([
+                //     'name' => $customer['customer_firstname'],
+                // ]));
+                // return view('frontend/order_confirmed_Mail', $data);
+
+
+            } else {
+                $data['orders'] = DB::table('orders')
+                    ->where('customer_id', $customer_id)->get();
+            }
+
+            //trying trait
+            echo $this->exampleMethod();
             return view('frontend/customers_order', $data);
-          
+
         } else {
 
             return redirect()->to('/');

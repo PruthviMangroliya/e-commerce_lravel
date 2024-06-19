@@ -5,6 +5,7 @@ namespace App\Http\Controllers\backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\categoryModel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -28,7 +29,7 @@ class CategoryController extends Controller
         // return $data;
 
         // $data['category'] = categoryModel::all()->simplePaginate(3); //eloquent 
-        // $data['category'] = categoryModel::where()->paginate(3);
+        // $data['category'] = categoryModel::all();
         $data['category'] = categoryModel::paginate(3);
         
         return view('backend/category/category_list', $data);
@@ -79,12 +80,6 @@ class CategoryController extends Controller
 
             $data['category'] = categoryModel::find($category_id);
 
-            // foreach ($data as $c) {
-            //     echo $category_id = $c->category_id;
-            //     echo $category_name = $c->category_name;
-            // }
-            // return $data['category'];
-
             return view('backend/category/edit_category', $data);
 
         } else {
@@ -94,9 +89,8 @@ class CategoryController extends Controller
                     'category_name' => 'unique:category,category_name,'.$category_id.',category_id' ,
                 ]
             );
-            // $data['category_name'] = $_POST['category_name'];
-            // $where = array('category_id' => $category_id);
-            // //   print_r($data);
+           
+            // $where = array('category_id' => $category_id);         
             // $this->categoryModel->update_category('category', $where, $data);
 
             // $image = $request->category_image;
@@ -114,6 +108,9 @@ class CategoryController extends Controller
                 'category_name' => $request->category_name
             ]);
 
+            //clear the cache for category
+            Cache::clear('category');
+            
             return redirect()->to('category_list')->with('message','Category Updated successfully..');
         }
     }
