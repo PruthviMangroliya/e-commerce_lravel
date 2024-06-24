@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Mail;
 
 use Stripe\Refund;
 
-class CustomerController extends Controller
+class CustomerFrontController extends Controller
 {
     use ExampleTrait;
     // public function header()

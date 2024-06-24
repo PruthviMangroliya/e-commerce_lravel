@@ -26,13 +26,13 @@ class CouponController extends Controller
 
             $diff = date_diff($expiry_date, $current_date);
             $days = $diff->format('%d');
-            if ($days > 0) {
-                $data['days_left'][] = $days . ' left to expire';
-            } else {
+            if ($current_date > $expiry_date) {
                 $data['days_left'][] = "Coupon is Expired";
                 CouponModel::find($coupon->coupon_id)->update([
                     'coupon_status' => 0
                 ]);
+            } else {
+                $data['days_left'][] = $days . ' left to expire';
             }
             // echo $diff->format('%d days');
 

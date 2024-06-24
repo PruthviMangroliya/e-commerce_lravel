@@ -16,7 +16,7 @@ class SalesDataController extends Controller
         if ($request->duration == 'daily') {
 
             $data['sales'] = OrdersModel::select('created_at as duration', 'order_total')->groupBy('created_at', 'order_total')->get();
-            //chart data Day wise
+            //chart date Day wise
 
         } elseif ($request->duration == 'weekly') {
 

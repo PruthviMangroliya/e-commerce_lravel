@@ -57,6 +57,10 @@
                 <img src="{{ asset('img/logo.png') }}" alt="">
                 <span class="d-none d-lg-block">KEY Logic</span>
             </a>
+            <?php
+            $a = Session::get('user');
+            print_r($a);
+            ?>
             <i class="bi bi-list toggle-sidebar-btn"></i>
         </div><!-- End Logo -->
 
@@ -70,16 +74,6 @@
 
         </div><!-- End Search Bar -->
 
-        <?php
-        // include('config');
-        // $email = $_SESSION['nicer_email'];
-        // //echo $email;
-        // $sql = "SELECT * FROM  user WHERE email='$email'";
-        // $result = mysqli_query($con, $sql);
-        // $row = mysqli_fetch_assoc($result);
-        // $name = $row['name'];
-        //echo $name;
-        ?>
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
 
@@ -94,56 +88,31 @@
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#"
                         data-bs-toggle="dropdown">
                         <img src="{{ asset('img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
-                        <span class="d-none d-md-block dropdown-toggle ps-2"><?php //echo $name
-                        ?></span>
+                        <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
                     </a><!-- End Profile Iamge Icon -->
 
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                         <li class="dropdown-header">
-                            <h6><?php //echo $name
-                            ?></h6>
+                            <h6>{{ Auth::user()->name }}</h6>
                             <span>Web Designer</span>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
                         </li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ '/profile' }}">
                                 <i class="bi bi-person"></i>
                                 <span>My Profile</span>
                             </a>
                         </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
 
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
-                                <i class="bi bi-gear"></i>
-                                <span>Account Settings</span>
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
 
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="pages-faq.html">
-                                <i class="bi bi-question-circle"></i>
-                                <span>Need Help?</span>
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="logout">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Sign Out</span>
-                            </a>
-                        </li>
+                            <x-dropdown-link :href="route('logout')"
+                                onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
 
                     </ul>
                 </li>
@@ -160,7 +129,19 @@
         <?php
         //-----getting name fof file from current url--------
         $f_name = basename($_SERVER['PHP_SELF']);
-        
+        $role = Auth::user()->role;
+        $permissions= array();
+        if ($role != 0) {
+            $role_permissions = DB::table('role_permission')->join('permissions', 'permissions.id', '=', 'role_permission.permission_id')->where('role_id', $role)->get();
+
+            // print_r($permissions);
+            foreach ($role_permissions as $p) {
+
+                $permissions[] = $p->permission;
+               
+            }
+            // print_r($permissions);
+        }
         ?>
 
         <ul class="sidebar-nav" id="sidebar-nav">
@@ -172,158 +153,203 @@
                 </a>
             </li><!-- End Dashboard Nav -->
 
+            @if (in_array('category', $permissions )||in_array('Super', $permissions)||in_array('admin', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link  <?php echo $f_name == 'add_category' || $f_name == 'category_list' ? '' : 'collapsed'; ?>" data-bs-target="#category-nav" data-bs-toggle="collapse"
+                        href="#">
+                        <i class="bi bi-menu-button-wide"></i><span>Category</span><i
+                            class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <ul id="category-nav" class="nav-content collapse <?php echo $f_name == 'add_category' || $f_name == 'category_list' ? 'show' : ''; ?>"
+                        data-bs-parent="#sidebar-nav">
+
+                        <li>
+                            <a href="{{ url('category_list') }} " <?php echo $f_name == 'category_list' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>View Categories</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('add_category') }} " <?php echo $f_name == 'add_category' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>Add Category</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li><!-- End Category Nav -->
+            @endif
+
+            @if (in_array('subcategory', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link <?php echo $f_name == 'add_subcategory' || $f_name == 'subcategory_list' ? '' : 'collapsed'; ?>" data-bs-target="#subcategory-nav" data-bs-toggle="collapse"
+                        href="#">
+                        <i class="bi bi-menu-button-wide"></i><span>Sub Category</span><i
+                            class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <ul id="subcategory-nav" class="nav-content collapse <?php echo $f_name == 'add_subcategory' || $f_name == 'subcategory_list' ? 'show' : ''; ?>"
+                        data-bs-parent="#sidebar-nav">
+
+                        <li>
+                            <a href="{{ url('subcategory_list') }} " <?php echo $f_name == 'subcategory_list' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>View Sub Category</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('add_subcategory') }} " <?php echo $f_name == 'add_subcategory' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>Add Sub Category</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li><!-- End Sub category Nav -->
+            @endif
+
+            @if (in_array('products', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link <?php echo $f_name == 'add_product' || $f_name == 'product_list' || $f_name == 'edit' ? '' : 'collapsed'; ?>" data-bs-target="#product-nav" data-bs-toggle="collapse"
+                        href="#">
+                        <i class="bi bi-menu-button-wide"></i><span>Product</span><i
+                            class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <ul id="product-nav" class="nav-content collapse <?php echo $f_name == 'add_product' || $f_name == 'product_list' || $f_name == 'edit' ? 'show' : ''; ?>"
+                        data-bs-parent="#sidebar-nav">
+
+                        <li>
+                            <a href="{{ url('product_list') }}" <?php echo $f_name == 'product_list' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>View Products</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('add_product') }} " <?php echo $f_name == 'add_product' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>Add Product</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li><!-- End product Nav -->
+
+                <li class="nav-item">
+                    <a class="nav-link  <?php echo $f_name == 'add_attribute' || $f_name == 'attribute_list' ? '' : 'collapsed'; ?>" data-bs-target="#attribute-nav"
+                        data-bs-toggle="collapse" href="#">
+                        <i class="bi bi-menu-button-wide"></i><span>attribute</span><i
+                            class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <ul id="attribute-nav" class="nav-content collapse <?php echo $f_name == 'add_attribute' || $f_name == 'attribute_list' ? 'show' : ''; ?>"
+                        data-bs-parent="#sidebar-nav">
+
+                        <li>
+                            <a href="{{ url('attribute_list') }} " <?php echo $f_name == 'attribute_list' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>View attributes</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('add_attribute') }} " <?php echo $f_name == 'add_attribute' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>Add attribute</span>
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </li><!-- End Attribute Nav -->
+
+                <li class="nav-item">
+                    <a class="nav-link  <?php echo $f_name == 'add_option' || $f_name == 'option_list' || $f_name == 'edit_option' ? '' : 'collapsed'; ?>" data-bs-target="#option-nav" data-bs-toggle="collapse"
+                        href="#">
+                        <i class="bi bi-menu-button-wide"></i><span>Options</span><i
+                            class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <ul id="option-nav" class="nav-content collapse <?php echo $f_name == 'add_option' || $f_name == 'option_list' || $f_name == 'edit_option' ? 'show' : ''; ?>"
+                        data-bs-parent="#sidebar-nav">
+
+                        <li>
+                            <a href="{{ url('option_list') }} " <?php echo $f_name == 'option_list' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>View options</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('add_option') }} " <?php echo $f_name == 'add_option' ? 'class="active"' : ''; ?>>
+                                <i class="bi bi-circle"></i><span>Add option</span>
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </li><!-- End option Nav -->
+            @endif
+            
+            @if (in_array('Super', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'users' ? '' : 'collapsed' }}" href="{{ url('/users') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>users</span>
+                    </a>
+                </li><!-- End Users Nav -->
+
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'permission' ? '' : 'collapsed' }}"
+                        href="{{ url('/permission') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>Permission</span>
+                    </a>
+                </li><!-- End Permission Nav -->
+
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'roles' ? '' : 'collapsed' }}" href="{{ url('/roles') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>Roles</span>
+                    </a>
+                </li><!-- End Roles Nav -->
+            @endif
+
+            @if (in_array('customer', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'customers' ? '' : 'collapsed' }}"
+                        href="{{ url('/customers') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>customers</span>
+                    </a>
+                </li><!-- End Customer Nav -->
+            @endif
+
+            @if (in_array('order', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'orders' || $f_name == 'order_details' ? '' : 'collapsed' }}"
+                        href="{{ url('orders') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>Orders</span>
+                    </a>
+                </li><!-- End orders Nav -->
+            @endif
+
+            @if (in_array('sales', $permissions)||in_array('Super', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'sales' ? '' : 'collapsed' }}" href="{{ url('/sales') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>Sales Data</span>
+                    </a>
+                </li><!-- End sales data Nav -->
+            @endif
+
+            @if (in_array('admin', $permissions)||in_array('Super', $permissions))
+                <li class="nav-item">
+                    <a class="nav-link  {{ $f_name == 'coupon' ? '' : 'collapsed' }}" href="{{ url('/coupons') }}">
+                        <i class="bi bi-menu-button-wide"></i>
+                        <span>Coupons</span>
+                    </a>
+                </li><!-- End coupon Nav -->
+
+                <li class="nav-heading">Pages</li>
+            @endif
+
             <li class="nav-item">
-                <a class="nav-link  <?php echo $f_name == 'add_category' || $f_name == 'category_list' ? '' : 'collapsed'; ?>" data-bs-target="#category-nav" data-bs-toggle="collapse"
-                    href="#">
-                    <i class="bi bi-menu-button-wide"></i><span>Category</span><i
-                        class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <ul id="category-nav" class="nav-content collapse <?php echo $f_name == 'add_category' || $f_name == 'category_list' ? 'show' : ''; ?>" data-bs-parent="#sidebar-nav">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
 
-                    <li>
-                        <a href="{{ url('category_list') }} " <?php echo $f_name == 'category_list' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>View Categories</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url('add_category') }} " <?php echo $f_name == 'add_category' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>Add Category</span>
-                        </a>
-                    </li>
-                </ul>
-            </li><!-- End Category Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link <?php echo $f_name == 'add_subcategory' || $f_name == 'subcategory_list' ? '' : 'collapsed'; ?>" data-bs-target="#subcategory-nav" data-bs-toggle="collapse"
-                    href="#">
-                    <i class="bi bi-menu-button-wide"></i><span>Sub Category</span><i
-                        class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <ul id="subcategory-nav" class="nav-content collapse <?php echo $f_name == 'add_subcategory' || $f_name == 'subcategory_list' ? 'show' : ''; ?>"
-                    data-bs-parent="#sidebar-nav">
-
-                    <li>
-                        <a href="{{ url('subcategory_list') }} " <?php echo $f_name == 'subcategory_list' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>View Sub Category</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url('add_subcategory') }} " <?php echo $f_name == 'add_subcategory' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>Add Sub Category</span>
-                        </a>
-                    </li>
-
-                </ul>
-            </li><!-- End Sub category Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link <?php echo $f_name == 'add_product' || $f_name == 'product_list' || $f_name == 'edit' ? '' : 'collapsed'; ?>" data-bs-target="#product-nav" data-bs-toggle="collapse"
-                    href="#">
-                    <i class="bi bi-menu-button-wide"></i><span>Product</span><i
-                        class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <ul id="product-nav" class="nav-content collapse <?php echo $f_name == 'add_product' || $f_name == 'product_list' || $f_name == 'edit' ? 'show' : ''; ?>" data-bs-parent="#sidebar-nav">
-
-                    <li>
-                        <a href="{{ url('product_list') }}" <?php echo $f_name == 'product_list' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>View Products</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url('add_product') }} " <?php echo $f_name == 'add_product' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>Add Product</span>
-                        </a>
-                    </li>
-
-                </ul>
-            </li>
-            {{-- End Product Nav --}}
-
-            <li class="nav-item">
-                <a class="nav-link  <?php echo $f_name == 'add_attribute' || $f_name == 'attribute_list' ? '' : 'collapsed'; ?>" data-bs-target="#attribute-nav" data-bs-toggle="collapse"
-                    href="#">
-                    <i class="bi bi-menu-button-wide"></i><span>attribute</span><i
-                        class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <ul id="attribute-nav" class="nav-content collapse <?php echo $f_name == 'add_attribute' || $f_name == 'attribute_list' ? 'show' : ''; ?>"
-                    data-bs-parent="#sidebar-nav">
-
-                    <li>
-                        <a href="{{ url('attribute_list') }} " <?php echo $f_name == 'attribute_list' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>View attributes</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url('add_attribute') }} " <?php echo $f_name == 'add_attribute' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>Add attribute</span>
-                        </a>
-                    </li>
-
-
-                </ul>
-            </li><!-- End Attribute Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link  <?php echo $f_name == 'add_option' || $f_name == 'option_list' || $f_name == 'edit_option' ? '' : 'collapsed'; ?>" data-bs-target="#option-nav" data-bs-toggle="collapse"
-                    href="#">
-                    <i class="bi bi-menu-button-wide"></i><span>Options</span><i
-                        class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <ul id="option-nav" class="nav-content collapse <?php echo $f_name == 'add_option' || $f_name == 'option_list' || $f_name == 'edit_option' ? 'show' : ''; ?>" data-bs-parent="#sidebar-nav">
-
-                    <li>
-                        <a href="{{ url('option_list') }} " <?php echo $f_name == 'option_list' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>View options</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url('add_option') }} " <?php echo $f_name == 'add_option' ? 'class="active"' : ''; ?>>
-                            <i class="bi bi-circle"></i><span>Add option</span>
-                        </a>
-                    </li>
-
-
-                </ul>
-            </li><!-- End option Nav -->
-
-
-            <li class="nav-item">
-                <a class="nav-link  {{ $f_name == 'customers' ? '' : 'collapsed' }}" href="{{ url('/customers') }}">
-                    <i class="bi bi-menu-button-wide"></i>
-                    <span>Customers</span>
-                </a>
-            </li><!-- End customer Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link  {{ $f_name == 'orders' || $f_name == 'order_details' ? '' : 'collapsed' }}"
-                    href="{{ url('orders') }}">
-                    <i class="bi bi-menu-button-wide"></i>
-                    <span>Orders</span>
-                </a>
-            </li><!-- End orders Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link  {{ $f_name == 'sales' ? '' : 'collapsed' }}" href="{{ url('/sales') }}">
-                    <i class="bi bi-menu-button-wide"></i>
-                    <span>Sales Data</span>
-                </a>
-            </li><!-- End sales data Nav -->
-
-            <li class="nav-item">
-                <a class="nav-link  {{ $f_name == 'coupon' ? '' : 'collapsed' }}" href="{{ url('/coupons') }}">
-                    <i class="bi bi-menu-button-wide"></i>
-                    <span>Coupons</span>
-                </a>
-            </li><!-- End coupon Nav -->
-
-            <li class="nav-heading">Pages</li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="logout">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Log out</span>
-                </a>
-            </li><!-- End Login Page Nav -->
+                    <x-dropdown-link :href="route('logout')"
+                        onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-dropdown-link>
+                </form>
+            </li><!-- logout -->
 
         </ul>
 

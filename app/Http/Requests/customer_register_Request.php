@@ -25,7 +25,7 @@ class customer_register_Request extends FormRequest
             "customer_firstname"=>"required",
             "customer_lastname"=>"required",
             "customer_email"=>"required|email",
-            "customer_telephone"=>"required|numeric",
+            "customer_telephone"=>"required|numeric|max_digits:10|min_digits:10",
             "customer_password"=>"required||required_with:customer_con_password|same:customer_con_password",
             "customer_con_password"=>"required",
             "customer_address"=>"required",

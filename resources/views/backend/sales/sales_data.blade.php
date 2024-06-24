@@ -131,7 +131,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         $("#duration").on('change', function() {
             console.log($(this).val())
             duration = $(this).val();
@@ -145,5 +145,5 @@
                 }
             })
         })
-    </script>
+    </script> --}}
 @endsection
