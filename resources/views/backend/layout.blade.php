@@ -153,7 +153,7 @@
                 </a>
             </li><!-- End Dashboard Nav -->
 
-            @if (in_array('category', $permissions )||in_array('Super', $permissions)||in_array('admin', $permissions))
+            @if (in_array('category', $permissions )||in_array('Super', $permissions)||in_array('admin', $permissions)||in_array('add_category', $permissions))
                 <li class="nav-item">
                     <a class="nav-link  <?php echo $f_name == 'add_category' || $f_name == 'category_list' ? '' : 'collapsed'; ?>" data-bs-target="#category-nav" data-bs-toggle="collapse"
                         href="#">
@@ -177,7 +177,7 @@
                 </li><!-- End Category Nav -->
             @endif
 
-            @if (in_array('subcategory', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions))
+            @if (in_array('subcategory', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions)||in_array('add_subcategory', $permissions))
                 <li class="nav-item">
                     <a class="nav-link <?php echo $f_name == 'add_subcategory' || $f_name == 'subcategory_list' ? '' : 'collapsed'; ?>" data-bs-target="#subcategory-nav" data-bs-toggle="collapse"
                         href="#">
@@ -202,7 +202,7 @@
                 </li><!-- End Sub category Nav -->
             @endif
 
-            @if (in_array('products', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions))
+            @if (in_array('products', $permissions)||in_array('Super', $permissions)||in_array('admin', $permissions)||in_array('add_product', $permissions))
                 <li class="nav-item">
                     <a class="nav-link <?php echo $f_name == 'add_product' || $f_name == 'product_list' || $f_name == 'edit' ? '' : 'collapsed'; ?>" data-bs-target="#product-nav" data-bs-toggle="collapse"
                         href="#">

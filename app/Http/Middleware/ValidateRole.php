@@ -22,26 +22,29 @@ class ValidateRole
         $permissions = $this->permissionPages();
 
         if (!empty($permissions)) {
-            foreach ($permissions as $permission) {
-                // echo $request->is($permission . '*');
-                if ($permission != "Super") {
-                    if ($permission == "admin") {
+            if (!in_array($request->path(), $permissions)) {
+                foreach ($permissions as $permission) {
+                    // echo $request->is($permission . '*');
+                    if ($permission != "Super") {
+                        if ($permission == "admin") {
 
-                        if ($request->is('*users*') || $request->is('*role*') || $request->is('*permission*')) {
+                            if ($request->is('*users*') || $request->is('*role*') || $request->is('*permission*')) {
 
-                            abort(403, "You don't have permission to this page");
+                                abort(403, "You don't have permission to this page");
+                            }
+                        } else {
+                            if (!$request->is('*' . $permission . '*')) {
+                                abort(403, "You don'nt have permission to this page");
+                            } else {
+                                break;
+                            }
                         }
-                    } elseif (!$request->is('*' . $permission . '*')) {
-
-                        abort(403, "You don'nt have permission to this page");
                     }
                 }
             }
-
             return $next($request);
         } else {
             return redirect()->to(route('dashboard'));
         }
     }
 }
-// Role&permission for user DONE..

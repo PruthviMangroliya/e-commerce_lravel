@@ -97,6 +97,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/users', [UserController::class, 'get_user']);
         Route::post('/change_role', [UserController::class, 'change_role']);
+        Route::get('/user_permissions/{id}',[UserController::class,'user_permissions']);
+        Route::post('/remove_permission',[UserController::class,'remove_permission']);
     });
 });
 

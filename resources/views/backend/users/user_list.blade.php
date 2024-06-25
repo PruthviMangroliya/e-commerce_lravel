@@ -55,6 +55,12 @@
                                                     Change Role
                                                 </button>
                                             </td>
+                                            <td>
+                                                @if($user->role !=0)
+                                                <a href="user_permissions/{{$user->id}}"><button type="button" class="btn btn-primary" data-toggle="modal">
+                                                   View permission </button></a>
+                                                @endif
+                                            </td>
                                         </tr>
                                         {{-- Modal to change user role --}}
                                         <div class="modal fade" id="assign_role_{{ $user->id }}" tabindex="-1"

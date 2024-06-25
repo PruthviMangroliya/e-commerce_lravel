@@ -1,7 +1,7 @@
 @extends('backend.layout')
 
 @section('title')
-    {{ 'Edit Product ' }}
+    {{ 'Add Product ' }}
 @endsection
 
 @section('content')
