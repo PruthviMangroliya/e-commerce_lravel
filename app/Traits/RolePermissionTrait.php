@@ -18,39 +18,42 @@ trait RolePermissionTrait
         $role = Auth::user()->role;
         $user_id = Auth::user()->id;
         if ($role != 0) {
-            $role_permissions = RolePermissionModel::join('permissions', 'permissions.id', '=', 'role_permission.permission_id')->where('role_id', $role)->get();
 
-            // print_r($permissions);
+            // $role_permissions = RolePermissionModel::join('permissions', 'permissions.id', '=', 'role_permission.permission_id')->where('role_id', $role)->get();
+
+            // $role_permissions = RolePermissionModel::join('permissions', 'permissions.id', '=', 'role_permission.permission_id')
+            //     ->join('user_disabled_permission', 'user_disabled_permission.permission_id', '!=', 'role_permission.permission_id')
+            //     ->where(['role_id' => $role, 'user_disabled_permission.user_id' => $user_id])->get();
+
+            $role_permissions = RolePermissionModel::where("role_id", $role)
+                ->join("permissions", "permissions.id", "role_permission.permission_id")
+                ->whereNotIn("role_permission.permission_id", function ($q) use ($user_id) {
+                    $q->select("permission_id")->from("user_disabled_permission")->where("user_id", $user_id);
+                })
+                ->get();
+
+            // dd($role_permissions);
+
             foreach ($role_permissions as $p) {
 
                 $permissions[] = $p->permission;
             }
 
-            $get_removed_permission_ids = UserDisabledPermissionModel::where('user_id', $user_id)->get();
-
-            $removed_permission_ids = array();
-            foreach ($get_removed_permission_ids as $removed) {
-                $removed_permission_ids[] = $removed->permission_id;
-            }
-
-            if (!empty($removed_permission_ids)) {
-                $get_removed_permissions = PermissionModel::whereIN('id', $removed_permission_ids)->get();
-
-                foreach ($get_removed_permissions as $removed) {
-                    $removed_permissions[] = $removed->permission;
-                }
-
-                if (!empty($removed_permissions)) {
-                    foreach ($removed_permissions as $key => $removable_permission) {
-                        if (in_array($removable_permission, $permissions)) {
-                            $removable_key = array_search($removable_permission, $permissions);
-                            unset($permissions[$removable_key]);
-                        }
-                    }
-                }
-            }
-            
             return $permissions;
+            // $removed_permissions = UserDisabledPermissionModel::join('permissions', 'permissions.id', '=', 'user_disabled_permission.permission_id')
+            // ->where('user_id', $user_id)->get();
+            // // print_r($removed_permissions);
+            // die;
+
+            //     if (!empty($removed_permissions)) {
+            //         foreach ($removed_permissions as $key => $removable_permission) {
+            //             if (in_array($removable_permission, $permissions)) {
+            //                 $removable_key = array_search($removable_permission, $permissions);
+            //                 unset($permissions[$removable_key]);
+            //             }
+            //         }
+            //     }
+            // return $permissions;
         }
     }
 

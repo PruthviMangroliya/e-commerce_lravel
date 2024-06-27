@@ -33,8 +33,8 @@ class ValidateRole
                                 abort(403, "You don't have permission to this page");
                             }
                         } else {
-                            if (!$request->is('*' . $permission . '*')) {
-                                abort(403, "You don'nt have permission to this page");
+                            if (!$request->is($permission)) {
+                                abort(403, "You don't have permission to this page");
                             } else {
                                 break;
                             }
@@ -44,7 +44,8 @@ class ValidateRole
             }
             return $next($request);
         } else {
-            return redirect()->to(route('dashboard'));
+            // return redirect()->to(route('dashboard'));
+            abort(403, "You don't have permission to this page");
         }
     }
 }

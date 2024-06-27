@@ -11,14 +11,25 @@ class SalesDataController extends Controller
 {
     public function barChart(Request $request)
     {
-        $data['sales'] = OrdersModel::select('created_at as duration', 'order_total')->groupBy('created_at', 'order_total')->get();
+        // $data['sales'] = OrdersModel::select('created_at as duration', 'order_total')->groupBy('created_at', 'order_total')->get();
+        $data['sales'] = OrdersModel::select([
+            DB::raw('created_at as duration'),
+            DB::raw('count(order_id) as quantity'),
+            DB::raw('sum(order_total) as order_total')
+        ])->groupBy('duration')->get();
 
         if ($request->duration == 'daily') {
 
-            $data['sales'] = OrdersModel::select('created_at as duration', 'order_total')->groupBy('created_at', 'order_total')->get();
+            // $data['sales'] = OrdersModel::select('created_at as duration', 'order_total')->groupBy('created_at', 'order_total')->get();
+            $data['sales'] = OrdersModel::select([
+                DB::raw('created_at as duration'),
+                DB::raw('count(order_id) as quantity'),
+                DB::raw('sum(order_total) as order_total')
+            ])->groupBy('duration')->get();
             //chart date Day wise
 
-        } elseif ($request->duration == 'weekly') {
+        } else
+        if ($request->duration == 'weekly') {
 
             $data['sales'] = OrdersModel::select([
                 DB::raw('week(created_at) as duration'),
@@ -60,17 +71,17 @@ class SalesDataController extends Controller
 
 
         if (isset($_GET['from']) && isset($_GET['to'])) {
-            // $data['sales_data'] = OrdersModel::
-            //     // join('customers', 'orders.customer_id', 'customers.customer_id')->
-            //     where('orders.created_at', '>=', $_GET['from'])
-            //     ->where('orders.created_at', '<=', $_GET['to'])
-            //     ->get();
+            $data['sales_data'] = OrdersModel::
+                // join('customers', 'orders.customer_id', 'customers.customer_id')->
+                where('orders.created_at', '>=', $_GET['from'])
+                ->where('orders.created_at', '<=', $_GET['to'])
+                ->get();
 
             // ->count('order_id');
 
-            $data['sales_data'] = OrdersModel::where('created_at', '>', now()->subWeek()->startOfWeek())
-                ->where('created_at', '<=', now()->subWeek()->endOfWeek())
-                ->get(); // Lastweek 
+            // $data['sales_data'] = OrdersModel::where('created_at', '>', now()->subWeek()->startOfWeek())
+            //     ->where('created_at', '<=', now()->subWeek()->endOfWeek())
+            //     ->get(); // Lastweek 
             // ->count();
 
             // $data['sales_data'] = OrdersModel::all()->map(function ($item) {
